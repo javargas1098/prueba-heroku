@@ -1,0 +1,26 @@
+{
+  "extends": ["stylelint-config-sass-guidelines"],
+  "rules": {
+    "block-no-empty": null,
+    "unit-allowed-list": ["em", "rem", "s", "px", "%", "vh", "deg", "vw"],
+    "number-leading-zero": null,
+    "block-opening-brace-space-before": null,
+    "indentation": null,
+    "color-hex-length": "long",
+    "declaration-block-trailing-semicolon": null,
+    "rule-empty-line-before": null,
+    "max-nesting-depth": null,
+    "declaration-property-value-blacklist": null,
+    "selector-max-compound-selectors": null,
+    "selector-no-qualifying-type": null,
+    "selector-list-comma-newline-after": "always",
+    "property-no-vendor-prefix": null,
+    "order/properties-alphabetical-order": null,
+    "selector-pseudo-element-no-unknown": null,
+    "color-named": null,
+    "string-quotes": null,
+    "scss/dollar-variable-pattern": null,
+    "declaration-block-semicolon-newline-after": null,
+    "no-missing-end-of-source-newline": null
+  }
+}
