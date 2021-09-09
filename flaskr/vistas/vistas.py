@@ -91,7 +91,7 @@ class VistaCancionFavorita(Resource):
 
     def get(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
-        query_string = "select c2.* from cancion c2 order by case when c2.id=(select  c.id from cancion c , cancion_favorita_usuario cfu , usuario u2 where c.id=cfu.cancion_id and u2.id=cfu.usuario_id and u2.id =" + str(
+        query_string = "select c2.* from cancion c2 order by case when c2.id in (select  c.id from cancion c , cancion_favorita_usuario cfu , usuario u2 where c.id=cfu.cancion_id and u2.id=cfu.usuario_id and u2.id =" + str(
             id_usuario) + ") then 1 else 2 end asc"
         result = db.engine.execute(query_string)
         # {'result': dict(row) for row in result}
@@ -108,7 +108,7 @@ class VistaPromedioUsuario(Resource):
     def get(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
         query_string = "select CAST (sum(rating) AS float) /count(rating) as promedio, usuario from rating_comentario rc where rc.usuario =" + \
-            str(id_usuario)
+            str(id_usuario) + "group by rc.usuario"
         result = db.engine.execute(query_string)
         return {'result': dict(row) for row in result}
 
@@ -138,12 +138,12 @@ class VistaComentariosCancion(Resource):
 
 class VistaRatingComentarios(Resource):
 
-    def post(self, id_cancion, id_usuario):
-        cancion = Cancion.query.get_or_404(id_cancion)
+    def post(self, id_comentario, id_usuario):
+        comentario = Comentario.query.get_or_404(id_comentario)
         usuario = Usuario.query.get_or_404(id_usuario)
-        nuevo_comentario = Comentario(descripcion=request.json["descripcion"])
-        cancion.comentarios.append(nuevo_comentario)
-        usuario.comentarios.append(nuevo_comentario)
+        nuevo_rating = RatingComentario(rating=request.json["rating"])
+        comentario.ratings.append(nuevo_rating)
+        usuario.ratings.append(nuevo_rating)
 
         try:
             db.session.commit()
@@ -151,11 +151,12 @@ class VistaRatingComentarios(Resource):
             db.session.rollback()
             return 'El usuario ya tiene un comentario asociado al album', 409
 
-        return comentario_schema.dump(nuevo_comentario)
+        return rating_comentario_schema.dump(nuevo_rating)
 
-    def get(self, id_comentario):
+    def get(self, id_comentario,id_usuario):
         comentario = Comentario.query.get_or_404(id_comentario)
-        return [rating_comentario_schema.dump(al) for al in comentario.ratings]
+        usuario = Usuario.query.get_or_404(id_usuario)
+        return [rating_comentario_schema.dump(al) for al in comentario.ratings and usuario.ratings]
 
 
 class VistaCancionesUsuario(Resource):

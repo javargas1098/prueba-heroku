@@ -40,7 +40,7 @@ api.add_resource(VistaComentariosAlbum,
 api.add_resource(VistaComentariosCancion,
                  '/comentariosCancion/<int:id_cancion>/<int:id_usuario>')
 api.add_resource(VistaRatingComentarios,
-                 '/ratings/<int:id_comentario>')
+                 '/ratings/<int:id_comentario>/<int:id_usuario>')
 api.add_resource(VistaPromedioUsuario,
                  '/promedio/<int:id_usuario>')
 api.add_resource(VistaCancionFavorita,
