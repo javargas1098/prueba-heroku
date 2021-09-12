@@ -32,7 +32,13 @@ class VistaCanciones(Resource):
 
     def get(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
-        return [cancion_schema.dump(ca) for ca in usuario.canciones or usuario.usuariosCanciones]
+        print(usuario.usuariosCanciones)
+        print(usuario.canciones)
+        cancionesCompartidas= [cancion_schema.dump(ca) for ca in usuario.usuariosCanciones]
+        cancionesUsuario=[cancion_schema.dump(ca) for ca in usuario.canciones]
+        for x in cancionesCompartidas:
+            cancionesUsuario.append(x)
+        return cancionesUsuario
 
 
 class VistaComentariosAlbum(Resource):
