@@ -30,7 +30,7 @@ api.add_resource(VistaAlbumUsuariosDisponibles,
                  '/album/<int:id_album>/usuariosDisponibles')
 api.add_resource(VistaCancionUsuariosDisponibles,
                  '/cancion/<int:id_cancion>/usuariosDisponibles')
-api.add_resource(VistaCancionesAlbum, '/album/<int:id_album>/canciones')
+api.add_resource(VistaCancionesAlbum, '/usuario/<int:id_usuarioLog>/album/<int:id_album>/canciones')
 api.add_resource(VistasCancionesUsuario,
                  '/cancionUsuario/<int:id_usuarioLog>/<int:id_cancion>/<int:id_usuario>')
 api.add_resource(VistasAlbumesUsuario,

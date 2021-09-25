@@ -32,8 +32,6 @@ class VistaCanciones(Resource):
 
     def get(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
-        print(usuario.usuariosCanciones)
-        print(usuario.canciones)
         cancionesCompartidas = [cancion_schema.dump(
             ca) for ca in usuario.usuariosCanciones]
         cancionesUsuario = [cancion_schema.dump(
@@ -63,7 +61,15 @@ class VistaComentariosAlbum(Resource):
     def get(self, id_album, id_usuario):
         album = Album.query.get_or_404(id_album)
         usuario = Usuario.query.get_or_404(id_usuario)
-        return [comentario_schema.dump(al) for al in album.comentarios]
+        comments = [comentario_schema.dump(al) for al in album.comentarios]
+        for comment in comments:
+            list_ratings = VistaRatingComentarios.get(self, comment['id'], id_usuario)
+            comment['ratings'] = []
+
+            for rating in list_ratings:
+                comment['ratings'].append(rating['rating'])
+
+        return comments
 
 
 class VistaCancionesFavoritas(Resource):
@@ -141,8 +147,15 @@ class VistaComentariosCancion(Resource):
     def get(self, id_cancion, id_usuario):
         cancion = Cancion.query.get_or_404(id_cancion)
         usuario = Usuario.query.get_or_404(id_usuario)
-        return [comentario_schema.dump(al) for al in cancion.comentarios]
+        comments = [comentario_schema.dump(al) for al in cancion.comentarios]
+        for comment in comments:
+            list_ratings = VistaRatingComentarios.get(self, comment['id'], id_usuario)
+            comment['ratings'] = []
 
+            for rating in list_ratings:
+                comment['ratings'].append(rating['rating'])
+
+        return comments
 
 class VistaRatingComentarios(Resource):
 
@@ -209,9 +222,9 @@ class VistaAlbumsUsuario(Resource):
     # @jwt_required()
     def get(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
-        albumesCompartidos = [cancion_schema.dump(
+        albumesCompartidos = [album_schema.dump(
             ca) for ca in usuario.usuariosAlbumes]
-        albumesUsuario = [cancion_schema.dump(ca) for ca in usuario.albumes]
+        albumesUsuario = [album_schema.dump(ca) for ca in usuario.albumes]
         for x in albumesCompartidos:
             albumesUsuario.append(x)
         return albumesUsuario
@@ -283,7 +296,8 @@ class VistaLogIn(Resource):
 
 class VistaCancionesAlbum(Resource):
 
-    def post(self, id_album):
+    def post(self, id_usuarioLog, id_album):
+        usuarioLog = Usuario.query.get_or_404(id_usuarioLog)
         album = Album.query.get_or_404(id_album)
 
         if "id_cancion" in request.json.keys():
@@ -293,13 +307,13 @@ class VistaCancionesAlbum(Resource):
             if nueva_cancion is not None:
                 album.canciones.append(nueva_cancion)
                 listUsers = AlbumesCompartidosUsuario.get(self, id_album)
-                listCanciones = VistaCancionesAlbum.get(self, id_album)
-                # for user in listUsers:
-                #     for cancion in listCanciones:
-                #         print(cancion['id'])
-                #         print(user['usuario_id'])
-                #         VistasCancionesUsuario.post(
-                #             self, 1, cancion['id'], user['usuario_id'])
+                listCanciones = VistaCancionesAlbum.get(self, usuarioLog, id_album)
+                for user in listUsers:
+                    for cancion in listCanciones:
+                        print(cancion['id'])
+                        print(user['usuario_id'])
+                        VistasCancionesUsuario.post(
+                            self, id_usuarioLog, cancion['id'], user['usuario_id'])
                 db.session.commit()
             else:
                 return 'Canción errónea', 404
@@ -310,7 +324,7 @@ class VistaCancionesAlbum(Resource):
         db.session.commit()
         return cancion_schema.dump(nueva_cancion)
 
-    def get(self, id_album):
+    def get(self, id_usuarioLog, id_album):
         album = Album.query.get_or_404(id_album)
         return [cancion_schema.dump(ca) for ca in album.canciones]
 
@@ -343,7 +357,7 @@ class VistasAlbumesUsuario(Resource):
             return 'El Album no pertenece al usuario logueado', 404
         else:
             album.compartirAlbum.append(usuario)
-            canciones = VistaCancionesAlbum.get(self, id_album)
+            canciones = VistaCancionesAlbum.get(self, id_usuarioLog, id_album)
             for i in range(len(canciones)):
                 VistasCancionesUsuario.post(
                     self, id_usuarioLog, canciones[i]['id'], id_usuario)
